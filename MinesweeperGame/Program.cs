@@ -9,9 +9,8 @@ namespace MinesweeperGame
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine(Constants.MinesweeperMessages.IntroductionMessage);
-            Mikrite.Construct().AddFileLogger("Logs/MinesweeperGame.txt").Build();
-            Mikrite.Service<ILogger>().LogInformationSource("The minesweeper log has started.");
+            MinesweeperConsoleGame game = new MinesweeperConsoleGame();
+            game.Run();
         }
     }
 }
