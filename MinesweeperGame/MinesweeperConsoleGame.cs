@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using MinesweeperGame.Core;
+using MinesweeperGame.Core.Extensions;
 
 namespace MinesweeperGame
 {
@@ -12,7 +14,7 @@ namespace MinesweeperGame
     {
         private MineCell[,] exposedArray;
         private MineCell[,] hiddenArray;
-        private Random random;
+        private readonly Random random;
 
         public MinesweeperConsoleGame()
         {
@@ -40,24 +42,36 @@ namespace MinesweeperGame
 
         private void FillExposedArray(int mineNumber)
         {
-            for (int i = 0; i < mineNumber; i++)
-            {
-                exposedArray[random.Next(hiddenArray.GetLength(0)), random.Next(hiddenArray.GetLength(1))] = new MineCell(isMine: true);
-            }
+            FillExposedArrayWithMines(mineNumber);
+            FillNullMineCellsWithEmptyCells();
+            CalculateMineCount();
+        }
 
+        private void FillNullMineCellsWithEmptyCells()
+        {
+            Enumerable.Range(0, exposedArray.GetLength(0)).Repeat(x =>
+            {
+                Enumerable.Range(0, exposedArray.GetLength(1)).Repeat(y =>
+                {
+                    exposedArray[x, y] = exposedArray[x, y] ?? new MineCell(isMine: false);
+                });
+            });
+        }
+
+        private void FillExposedArrayWithMines(int mineNumber)
+        {
+            Enumerable.Range(0, mineNumber).Repeat(x =>
+            {
+                exposedArray[random.Next(exposedArray.GetLength(0)), random.Next(exposedArray.GetLength(0))] = new MineCell(MineCellState.Exposed, true);
+            });
+        }
+        private void CalculateMineCount()
+        {
             for (int i = 0; i < exposedArray.GetLength(0); i++)
             {
                 for (int j = 0; j < exposedArray.GetLength(1); j++)
                 {
-                    exposedArray[i, j] = exposedArray[i, j] ?? new MineCell(isMine: false);
-                }
-            }
-
-            for (int i = 0; i < exposedArray.GetLength(0); i++)
-            {
-                for (int j = 0; j < exposedArray.GetLength(1); j++)
-                {
-                    if (!exposedArray[i,j].IsMine)
+                    if (!exposedArray[i, j].IsMine)
                     {
                         for (int x = -1; x < 2; x++)
                         {
@@ -65,7 +79,7 @@ namespace MinesweeperGame
                             {
                                 if (i + x >= 0 && j + y >= 0 && i + x <= exposedArray.GetLength(0) - 1 && j + y <= exposedArray.GetLength(0) - 1)
                                 {
-                                    if ( exposedArray[i + x, j + y].IsMine)
+                                    if (exposedArray[i + x, j + y].IsMine)
                                     {
                                         exposedArray[i, j].MineCount++;
                                     }
@@ -74,16 +88,23 @@ namespace MinesweeperGame
                         }
                     }
                 }
-            } 
-
-
+            }
         }
 
         private void PrintExposedMineField()
         {
             Console.Write("    |");
-            for (int m = 1; m <= exposedArray.GetLength(0); m++) { Console.Write($"  {m}  "); }
-            Console.WriteLine(); Console.Write("----+"); for (int m = 1; m <= exposedArray.GetLength(0); m++) { Console.Write("-----"); }
+            for (int m = 1; m <= exposedArray.GetLength(0); m++)
+            {
+                Console.Write($"  {m}  ");
+            }
+            Console.WriteLine(); 
+            Console.Write("----+");
+            for (int m = 1; m <= exposedArray.GetLength(0); m++)
+            {
+                Console.Write("-----");
+            }
+
             Console.WriteLine();
 
             for (int i = 0; i < exposedArray.GetLength(0); i++)
@@ -110,17 +131,10 @@ namespace MinesweeperGame
                     {
                         PrintColorText(ConsoleColor.Blue, (char)(exposedArray[i, j].MineCount + 48));
                     }
-
-                    
                 }
 
                 Console.WriteLine();
             }
-        }
-
-        private void CalculateMineCount()
-        {
-            
         }
 
         private void PrintColorText(ConsoleColor color, char character)

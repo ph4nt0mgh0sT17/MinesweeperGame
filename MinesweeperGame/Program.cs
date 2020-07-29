@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using Microsoft.Extensions.Logging;
 using MinesweeperGame.Core;
 using StudentSystem.Core;
@@ -9,7 +10,7 @@ namespace MinesweeperGame
     {
         public static void Main(string[] args)
         {
-            MinesweeperConsoleGame game = new MinesweeperConsoleGame();
+            MinesweeperConsoleGame game = new MinesweeperConsoleGame(); 
             game.Run();
         }
     }
