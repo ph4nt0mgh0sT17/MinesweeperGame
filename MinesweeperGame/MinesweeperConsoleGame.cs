@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Linq;
 using System.Text;
 using MinesweeperGame.Core;
@@ -12,6 +13,8 @@ namespace MinesweeperGame
     /// </summary>
     internal class MinesweeperConsoleGame
     {
+        private int fieldNumber;
+        private int mineNumber;
         private MineCell[,] exposedArray;
         private MineCell[,] hiddenArray;
         private readonly Random random;
@@ -26,18 +29,38 @@ namespace MinesweeperGame
             Console.WriteLine(Constants.MinesweeperMessages.IntroductionMessage);
 
             Console.Write("Type number of mines: ");
-            int mineNumber = int.Parse(Console.ReadLine());
+            mineNumber = int.Parse(Console.ReadLine() ?? "0");
 
             Console.Write("Type number of fields: ");
-            int fieldNumber = int.Parse(Console.ReadLine());
+            fieldNumber = int.Parse(Console.ReadLine() ?? "0");
 
-            exposedArray = new MineCell[fieldNumber,fieldNumber];
-            hiddenArray = new MineCell[fieldNumber,fieldNumber];
+            InitializeMinesweeperBoards();
+            FillAllMinesweeperBoards();
 
+            PrintMinesweeperBoard(exposedArray);
+            PrintMinesweeperBoard(hiddenArray);
+
+            AskForCoordinates();
+        }
+
+        private void InitializeMinesweeperBoards()
+        {
+            exposedArray = new MineCell[fieldNumber, fieldNumber];
+            hiddenArray = new MineCell[fieldNumber, fieldNumber];
+        }
+
+        private void FillAllMinesweeperBoards()
+        {
             FillHiddenArray();
             FillExposedArray(mineNumber);
+        }
 
-            PrintExposedMineField();
+        private void FillHiddenArray()
+        {
+            hiddenArray.ForEachMineCell((x, y) =>
+            {
+                hiddenArray[x,y] = new MineCell(MineCellState.Hidden, false);
+            });
         }
 
         private void FillExposedArray(int mineNumber)
@@ -49,12 +72,9 @@ namespace MinesweeperGame
 
         private void FillNullMineCellsWithEmptyCells()
         {
-            Enumerable.Range(0, exposedArray.GetLength(0)).Repeat(x =>
+            exposedArray.ForEachMineCell((x, y) =>
             {
-                Enumerable.Range(0, exposedArray.GetLength(1)).Repeat(y =>
-                {
-                    exposedArray[x, y] = exposedArray[x, y] ?? new MineCell(isMine: false);
-                });
+                exposedArray[x, y] = exposedArray[x, y] ?? new MineCell();
             });
         }
 
@@ -67,67 +87,64 @@ namespace MinesweeperGame
         }
         private void CalculateMineCount()
         {
-            for (int i = 0; i < exposedArray.GetLength(0); i++)
+            exposedArray.ForEachMineCell((i,j) =>
             {
-                for (int j = 0; j < exposedArray.GetLength(1); j++)
+                if (!exposedArray[i, j].IsMine)
                 {
-                    if (!exposedArray[i, j].IsMine)
+                    for (int x = -1; x < 2; x++)
                     {
-                        for (int x = -1; x < 2; x++)
+                        for (int y = -1; y < 2; y++)
                         {
-                            for (int y = -1; y < 2; y++)
+                            if (i + x >= 0 && j + y >= 0 && i + x <= exposedArray.GetLength(0) - 1 && j + y <= exposedArray.GetLength(0) - 1)
                             {
-                                if (i + x >= 0 && j + y >= 0 && i + x <= exposedArray.GetLength(0) - 1 && j + y <= exposedArray.GetLength(0) - 1)
+                                if (exposedArray[i + x, j + y].IsMine)
                                 {
-                                    if (exposedArray[i + x, j + y].IsMine)
-                                    {
-                                        exposedArray[i, j].MineCount++;
-                                    }
+                                    exposedArray[i, j].MineCount++;
                                 }
                             }
                         }
                     }
                 }
-            }
+            });
         }
 
-        private void PrintExposedMineField()
+        private void PrintMinesweeperBoard(MineCell[,] minesweeperBoard)
         {
             Console.Write("    |");
-            for (int m = 1; m <= exposedArray.GetLength(0); m++)
+            for (int m = 1; m <= minesweeperBoard.GetLength(0); m++)
             {
                 Console.Write($"  {m}  ");
             }
             Console.WriteLine(); 
             Console.Write("----+");
-            for (int m = 1; m <= exposedArray.GetLength(0); m++)
+            for (int m = 1; m <= minesweeperBoard.GetLength(0); m++)
             {
                 Console.Write("-----");
             }
 
             Console.WriteLine();
 
-            for (int i = 0; i < exposedArray.GetLength(0); i++)
+            for (int i = 0; i < minesweeperBoard.GetLength(0); i++)
             {
                 Console.Write($"{i + 1,-4}|");
-                for (int j = 0; j < exposedArray.GetLength(1); j++)
+                for (int j = 0; j < minesweeperBoard.GetLength(1); j++)
                 {
-                    if (exposedArray[i, j].MineState == MineCellState.Hidden)
+                    if (minesweeperBoard[i, j].MineState == MineCellState.Hidden)
                     {
                         PrintColorText(ConsoleColor.Black, '#');
                     }
 
-                    else if (exposedArray[i, j].IsMine)
+                    else if (minesweeperBoard[i, j].IsMine)
                     {
                         PrintColorText(ConsoleColor.DarkRed, 'x');
                     }
 
-                    else if (exposedArray[i, j].MineCount == 0)
+                    else if (minesweeperBoard[i, j].MineCount == 0)
                     {
                         PrintColorText(ConsoleColor.Green, (char)(exposedArray[i, j].MineCount + 48));
                     }
 
-                    else if (exposedArray[i, j].MineCount > 0)
+                    else if (minesweeperBoard[i, j].MineCount > 0)
                     {
                         PrintColorText(ConsoleColor.Blue, (char)(exposedArray[i, j].MineCount + 48));
                     }
@@ -135,6 +152,8 @@ namespace MinesweeperGame
 
                 Console.WriteLine();
             }
+
+            Console.WriteLine();
         }
 
         private void PrintColorText(ConsoleColor color, char character)
@@ -145,15 +164,184 @@ namespace MinesweeperGame
             Console.BackgroundColor = defaultColor;
         }
 
-        private void FillHiddenArray()
+        /// <summary>
+        /// Asks for coordinates and chooses the mine cell...
+        /// </summary>
+        private void AskForCoordinates()
         {
-            for (int i = 0; i < hiddenArray.GetLength(0); i++)
+            Console.Write("Type the number of the row: ");
+            int x = int.Parse(Console.ReadLine() ?? "0");
+
+            Console.Write("Type the number of the column: ");
+            int y = int.Parse(Console.ReadLine() ?? "0");
+
+            bool validCoordinates = false;
+
+            while (!validCoordinates)
             {
-                for (int j = 0; j < hiddenArray.GetLength(1); j++)
+                if (ValidateCoordinates(x, y))
                 {
-                    hiddenArray[i,j] = new MineCell(MineCellState.Hidden, false);
+                    if (hiddenArray[x, y].MineState == MineCellState.Exposed)
+                    {
+                        Console.WriteLine(Constants.MinesweeperMessages.MineCellAlreadyExposed);
+                    }
+
+                    else
+                    {
+                        validCoordinates = true;
+                    }
                 }
             }
+
+            int originalX = x - 1;
+            int originalY = y - 1;
+
+            // Has zero neighbour mines
+            if (exposedArray[originalX, originalY].MineCount == 0)
+            {
+                CheckZeroes(originalX, originalY);
+            }
+
+            hiddenArray[originalX, originalY] = exposedArray[originalX, originalY];
+
+            PrintMinesweeperBoard(exposedArray);
+            PrintMinesweeperBoard(hiddenArray);
+
+
+        }
+
+        private bool ValidateCoordinates(int x, int y)
+        {
+            return x >= 0 && y >= 0 && x < fieldNumber && y < fieldNumber;
+        }
+
+        private void CheckZeroes(int x, int y)
+        {
+            // Toto číslo můžeme klidně odhalit protože z předešlé podmínky víme že na těchto iniciálních koordinátech se nachází právě nula
+            hiddenArray[x, y] = exposedArray[x, y];
+
+            // Příkazy které kontrolují všechny směry kde může být nula
+            CheckUp(x, y);
+            CheckLeft(x, y);
+            CheckRight(x, y);
+            CheckDown(x, y);
+
+        }
+
+        private void CheckUp(int x, int y)
+        {
+            // Pokud je index x 0, můžeme rovnou ukončit metodu protože není nikde výš kde bychom mohli jít, jinak by nám program vyhodil OutOfIndex exception
+            if (x == 0)
+            {
+                return;
+            }
+
+            // Pokud číslo o 1 index  výše není nula, nebo to číslo bylo již odhaleno, nemá smysl dál pokračovat a ukončíme metodu
+            if (exposedArray[x - 1, y].MineCount != 0 || hiddenArray[x - 1, y].MineState != MineCellState.Hidden)
+            {
+                return;
+            }
+
+            // Víme že na koordinátech x - 1, y se nachází nula tak ji rovnou odhalíme v poli 'b'...
+            x = x - 1;
+            hiddenArray[x, y] = exposedArray[x, y];
+
+            CheckLeft(x, y);
+            CheckRight(x, y);
+            CheckUp(x, y);
+        }
+
+        private void CheckDown(int x, int y)
+        {
+            // Pokud je index 'x' na konci nemá smysl kde dál jít tak rovnou ukončíme metodu
+            if (x == exposedArray.GetLength(0) - 1)
+            {
+                return;
+            }
+
+            // Pokud číslo o 1 index níže není nula nebo je již odhaleno tak nemá také smysl dál pokračovat
+            if (exposedArray[x + 1, y].MineCount != 0 || hiddenArray[x + 1, y].MineState != MineCellState.Hidden)
+            {
+                return;
+            }
+
+            // Víme že číslo o 1 index níže je 0 tak to číslo rovnou odhalíme v poli 'b'
+            x = x + 1;
+            hiddenArray[x, y] = exposedArray[x, y];
+
+            CheckLeft(x, y);
+            CheckRight(x, y);
+            CheckDown(x, y);
+        }
+
+        private void CheckLeft(int x, int y)
+        {
+            // To samé co platí u metody CheckUp
+            if (y == 0)
+            {
+                return;
+            }
+
+            // To samé co platí u metody CheckUp
+            if (exposedArray[x, y - 1].MineCount != 0 || hiddenArray[x, y - 1].MineState != MineCellState.Hidden)
+            {
+                return;
+            }
+
+            // Víme že číslo o 1 index vlevo je 0 tak to číslo rovnou odhalíme v poli 'b'
+            y = y - 1;
+            hiddenArray[x, y] = exposedArray[x, y];
+
+
+            CheckUp(x, y);
+            CheckDown(x, y);
+            CheckLeft(x, y);
+        }
+
+        private void CheckRight(int x, int y)
+        {
+            // Pokud jsme již na konci pole nemá smysl dál pokračovat není co odhalovat => ukončíme metodu
+            if (y == exposedArray.GetLength(0) - 1)
+            {
+                return;
+            }
+
+            // Pokud číslo o 1 index vpravo není 0 nebo je již odhaleno nemá smysl dál pokračovat => ukončíme metodu
+            if (exposedArray[x, y + 1].MineCount != 0 || hiddenArray[x, y + 1].MineState != MineCellState.Hidden)
+            {
+                return;
+            }
+
+            // Víme že číslo o 1 index vpravo je 0 tak to číslo rovnou odhalíme v poli 'b'
+            y = y + 1;
+            hiddenArray[x, y] = exposedArray[x, y];
+
+
+            CheckUp(x, y);
+            CheckDown(x, y);
+            CheckRight(x, y);
+        }
+
+        /// <summary>
+        /// Checks the win 
+        /// </summary>
+        /// <returns></returns>
+        private bool CheckWin()
+        {
+
+            bool state = true;
+            Enumerable.Range(0, hiddenArray.GetLength(0)).Repeat(x =>
+            {
+                Enumerable.Range(0, hiddenArray.GetLength(1)).Repeat(y =>
+                {
+                    if (hiddenArray[x, y].MineState == MineCellState.Hidden)
+                    {
+                        state = false;
+                    }
+                });
+            });
+
+            return state;
         }
     }
 }

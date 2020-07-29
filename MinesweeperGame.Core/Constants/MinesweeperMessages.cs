@@ -7,6 +7,7 @@ namespace MinesweeperGame.Core
         public static class MinesweeperMessages
         {
             public const string IntroductionMessage = "Welcome to the Minesweeper game!";
+            public const string MineCellAlreadyExposed = "The mine cell is already discovered.";
         }
     }
 }

@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MinesweeperGame
+namespace MinesweeperGame.Core
 {
     /// <summary>
     /// The class that represents the mine element in the field.
     /// </summary>
-    internal class MineCell
+    public class MineCell
     {
         /// <summary>
         /// The state of the mine if hidden or already exposed;
