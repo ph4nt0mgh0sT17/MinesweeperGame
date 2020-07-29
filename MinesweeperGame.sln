@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.30320.27
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinesweeperGame", "MinesweeperGame\MinesweeperGame.csproj", "{EB506D01-B83E-44F4-BAA9-1B522924DAA6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinesweeperGame.Core", "MinesweeperGame.Core\MinesweeperGame.Core.csproj", "{90858C49-D494-459C-9531-4CA79DDD3DAC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{EB506D01-B83E-44F4-BAA9-1B522924DAA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EB506D01-B83E-44F4-BAA9-1B522924DAA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EB506D01-B83E-44F4-BAA9-1B522924DAA6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{90858C49-D494-459C-9531-4CA79DDD3DAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{90858C49-D494-459C-9531-4CA79DDD3DAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{90858C49-D494-459C-9531-4CA79DDD3DAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{90858C49-D494-459C-9531-4CA79DDD3DAC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

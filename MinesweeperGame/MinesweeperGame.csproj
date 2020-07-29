@@ -5,4 +5,19 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.6" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MinesweeperGame.Core\MinesweeperGame.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="StudentSystem.Core">
+      <HintPath>..\..\StudentSystem\StudentSystem.Core\bin\Debug\netcoreapp3.1\StudentSystem.Core.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>
