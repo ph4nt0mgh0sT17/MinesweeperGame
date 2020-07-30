@@ -45,7 +45,16 @@ namespace MinesweeperGame
             PrintMinesweeperBoard(exposedArray);
             PrintMinesweeperBoard(hiddenArray);
 
-            AskForCoordinates();
+            while (GetGameState() == MinesweeperGameState.Progress)
+            {
+                MinesweeperCoordinate minesweeperCoordinate = AskForCoordinates();
+                DiscoverCoordinate(minesweeperCoordinate);
+
+                PrintMinesweeperBoard(exposedArray);
+                PrintMinesweeperBoard(hiddenArray);
+            }
+
+            Console.WriteLine(GetGameState() == MinesweeperGameState.Win ? "You have won!!!" : "You have lost!!! HAHAHA");
         }
 
         private int AskUserForNumber(string text)
@@ -178,21 +187,18 @@ namespace MinesweeperGame
         /// <summary>
         /// Asks for coordinates and chooses the mine cell...
         /// </summary>
-        private void AskForCoordinates()
+        private MinesweeperCoordinate AskForCoordinates()
         {
-            Console.Write("Type the number of the row: ");
-            int x = int.Parse(Console.ReadLine() ?? "0");
-
-            Console.Write("Type the number of the column: ");
-            int y = int.Parse(Console.ReadLine() ?? "0");
+            int x = AskUserForNumber("Type the number of the row: ");
+            int y = AskUserForNumber("Type the number of the column: ");
 
             bool validCoordinates = false;
 
             while (!validCoordinates)
             {
-                if (ValidateCoordinates(x, y))
+                if (ValidateCoordinates(x - 1, y - 1))
                 {
-                    if (hiddenArray[x, y].MineState == MineCellState.Exposed)
+                    if (hiddenArray[x - 1, y - 1].MineState == MineCellState.Exposed)
                     {
                         Console.WriteLine(Constants.MinesweeperMessages.MineCellAlreadyExposed);
                     }
@@ -204,21 +210,18 @@ namespace MinesweeperGame
                 }
             }
 
-            int originalX = x - 1;
-            int originalY = y - 1;
+            return new MinesweeperCoordinate(x - 1, y - 1);
+        }
 
+        private void DiscoverCoordinate(MinesweeperCoordinate minesweeperCoordinate)
+        {
             // Has zero neighbour mines
-            if (exposedArray[originalX, originalY].MineCount == 0)
+            if (exposedArray[minesweeperCoordinate.X, minesweeperCoordinate.Y].MineCount == 0)
             {
-                CheckZeroes(originalX, originalY);
+                CheckZeroes(minesweeperCoordinate.X, minesweeperCoordinate.Y);
             }
 
-            hiddenArray[originalX, originalY] = exposedArray[originalX, originalY];
-
-            PrintMinesweeperBoard(exposedArray);
-            PrintMinesweeperBoard(hiddenArray);
-
-
+            hiddenArray[minesweeperCoordinate.X, minesweeperCoordinate.Y] = exposedArray[minesweeperCoordinate.X, minesweeperCoordinate.Y];
         }
 
         private bool ValidateCoordinates(int x, int y)
@@ -334,25 +337,31 @@ namespace MinesweeperGame
         }
 
         /// <summary>
-        /// Checks the win 
+        /// Gets the game state of the game.
         /// </summary>
-        /// <returns></returns>
-        private bool CheckWin()
+        private MinesweeperGameState GetGameState()
         {
+            MinesweeperGameState currentState = MinesweeperGameState.Win;
 
-            bool state = true;
-            Enumerable.Range(0, hiddenArray.GetLength(0)).Repeat(x =>
+            hiddenArray.ForEachMineCell((x, y) =>
             {
-                Enumerable.Range(0, hiddenArray.GetLength(1)).Repeat(y =>
+                if (currentState == MinesweeperGameState.Lose)
                 {
-                    if (hiddenArray[x, y].MineState == MineCellState.Hidden)
-                    {
-                        state = false;
-                    }
-                });
+                    return;
+                }
+
+                if (hiddenArray[x, y].MineState == MineCellState.Hidden)
+                {
+                    currentState = MinesweeperGameState.Progress;
+                }       
+
+                else if (hiddenArray[x, y].IsMine)
+                {
+                    currentState = MinesweeperGameState.Lose;
+                }
             });
 
-            return state;
+            return currentState;
         }
     }
 }
