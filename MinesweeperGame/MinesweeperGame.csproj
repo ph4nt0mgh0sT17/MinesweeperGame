@@ -6,17 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Mikrite.Core" Version="1.0.1" />
+    <PackageReference Include="Mikrite.Core" Version="1.0.3" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\MinesweeperGame.Core\MinesweeperGame.Core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="StudentSystem.Core">
-      <HintPath>..\..\StudentSystem\StudentSystem.Core\bin\Debug\netcoreapp3.1\StudentSystem.Core.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>
