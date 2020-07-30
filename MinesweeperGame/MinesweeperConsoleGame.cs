@@ -3,8 +3,12 @@ using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Linq;
 using System.Text;
+using Microsoft.Extensions.Logging;
+using Mikrite.Core.DependencyInjection;
+using Mikrite.Core.Extensions;
 using MinesweeperGame.Core;
 using MinesweeperGame.Core.Extensions;
+using MinesweeperGame.DependencyInjection;
 
 namespace MinesweeperGame
 {
@@ -13,6 +17,8 @@ namespace MinesweeperGame
     /// </summary>
     internal class MinesweeperConsoleGame
     {
+        private readonly ILogger mLogger;
+        
         private int fieldNumber;
         private int mineNumber;
         private MineCell[,] exposedArray;
@@ -22,17 +28,16 @@ namespace MinesweeperGame
         public MinesweeperConsoleGame()
         {
             random = new Random();
+            mLogger = DependencyInjectionProvider.Logger;
         }
 
         public void Run()
         {
+            mLogger.LogInformationSource(Constants.MinesweeperMessages.IntroductionMessage);
             Console.WriteLine(Constants.MinesweeperMessages.IntroductionMessage);
 
-            Console.Write("Type number of mines: ");
-            mineNumber = int.Parse(Console.ReadLine() ?? "0");
-
-            Console.Write("Type number of fields: ");
-            fieldNumber = int.Parse(Console.ReadLine() ?? "0");
+            mineNumber = AskUserForNumber("Type number of mines: ");
+            fieldNumber = AskUserForNumber("Type number of fields: ");
 
             InitializeMinesweeperBoards();
             FillAllMinesweeperBoards();
@@ -41,6 +46,12 @@ namespace MinesweeperGame
             PrintMinesweeperBoard(hiddenArray);
 
             AskForCoordinates();
+        }
+
+        private int AskUserForNumber(string text)
+        {
+            Console.Write(text);
+            return int.Parse(Console.ReadLine() ?? "0");
         }
 
         private void InitializeMinesweeperBoards()
